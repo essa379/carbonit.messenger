@@ -1,0 +1,12 @@
+msgtor/
+├── tor/                       <-- (Contains tor.exe, geoip, geoip6, torrc)
+│   ├── tor.exe
+│   ├── geoip
+│   ├── geoip6
+│   ├── torrc                  <-- (You will create this file now)
+│   └── ... (DLLs and other files)
+├── msg/          <-- (This will contain 'hostname' after running Tor)
+├── p2p_node.py                <-- (Your Python script)
+├── 1_setup_env.bat
+├── 2_start_daemon.bat
+└── 3_start_messenger.bat
