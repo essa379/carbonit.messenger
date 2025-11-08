@@ -1,0 +1,18 @@
+# Tor Daemon Configuration for P2P Node
+
+# SOCKS proxy for outgoing messages (Python client)
+SocksPort 127.0.0.1:9050
+
+# Directory for the v3 .onion keys.
+# Path is: ..\msg\ (Goes up one level to 'msgtor', then into 'msg')
+HiddenServiceDir ..\msg\
+
+# Map the virtual .onion port (6543) to your local Python listener (6543)
+HiddenServicePort 6543 127.0.0.1:6543
+
+# Enable the Control Port (for future use with 'stem' library)
+ControlPort 9051
+
+# Tell Tor where to find the geoip files (they are in this same 'tor' folder)
+GeoIPFile geoip
+GeoIPv6File geoip6
