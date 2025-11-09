@@ -7,7 +7,7 @@ This project creates a simple, text-based, peer-to-peer messenger that routes al
 ## 📁 Project Structure
 
 ```
-msgtor/
+carbonit.messenger/
 ├── tor/
 │   ├── tor.exe
 │   └── torrc                  # Tor configuration file
@@ -24,7 +24,7 @@ msgtor/
 
 ### Step 1: Download
 
-Clone or download the entire **msgtor** folder.
+Clone or download the entire **carbonit.messenger** Zip file.
 
 ### Step 2: Run Initial Setup
 
@@ -70,7 +70,7 @@ Leave this window open.
 
 After the daemon starts, it generates your unique P2P address.
 
-1. Open the **msgtor/msg/** folder.
+1. Open the **carbonit.messenger/msg/** folder.
 2. Find the file named **hostname**.
 3. Open it in any text editor.
 4. Copy the `.onion` address inside.
