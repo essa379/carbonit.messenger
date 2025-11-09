@@ -28,7 +28,7 @@ Clone or download the entire **carbonit.messenger** Zip file.
 
 ### Step 2: Run Initial Setup
 
-Navigate inside the `msgtor` folder and run:
+Navigate inside the `carbonit.messenger` folder and run:
 
 ```
 1_setup_env.bat
