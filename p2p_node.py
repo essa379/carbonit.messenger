@@ -24,6 +24,7 @@ import socket
 import socks
 import threading
 import time
+import os
 
 # --- Configuration ---
 SOCKS_HOST = '127.0.0.1'
@@ -33,13 +34,31 @@ LISTEN_PORT = 6543 # Local port to receive Tor-forwarded traffic (from torrc)
 
 # --- CRITICAL CHANGE: Update path to the 'msg' folder ---
 # The path must be absolute or relative to where 3_start_messenger.bat is run
-ONION_ADDRESS_FILE = r"msg\hostname" 
+ONION_ADDRESS_FILE = r"msg\hostname"
+CONTACT_FILE = r'msg\contact.txt'
 
 # --- Global State ---
 MY_ONION_ADDRESS = "" 
-CONTACTS = {
-    "pojit":"qrsankxqixkkip6mlkhyv3sbufzi4fwv5sdoarmbf4wkuoeel4dkkqid.onion" 
-}
+CONTACTS = {}
+
+#contacts
+def load_contacts():
+    """Loads contacts from the contact.txt file into a dictionary."""
+    contacts = {}
+    if not os.path.exists(CONTACT_FILE):
+        return contacts  # Return empty dict if file doesn't exist
+        
+    try:
+        with open(CONTACT_FILE, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and '=' in line:
+                    # Split only on the first '='
+                    name, onion = line.split('=', 1)
+                    contacts[name.strip()] = onion.strip()
+    except Exception as e:
+        print(f"[ERROR] Could not read {CONTACT_FILE}: {e}")
+    return contacts
 
 # --- 1. The Listener (Receiving Thread) ---
 def listener_thread():
@@ -91,7 +110,7 @@ def send_message(target_onion, message):
 
 # --- 3. Main Chat Loop ---
 def main_chat_loop():
-    global MY_ONION_ADDRESS
+    global MY_ONION_ADDRESS, CONTACTS # <-- Add CONTACTS here
     
     # Read our own .onion address from the file
     try:
@@ -102,9 +121,12 @@ def main_chat_loop():
     except FileNotFoundError:
         print(f"\n[!] FATAL ERROR: Cannot find the 'hostname' file at {ONION_ADDRESS_FILE}. Is Tor running and did it create the 'msg' folder?")
         return
+        
+    # --- Load external contacts ---
+    CONTACTS = load_contacts() # <-- Add this line
 
     print("\n--- P2P Anonymous Messenger Node Initialized ---")
-    print(f"Current Contacts: {', '.join(CONTACTS.keys()) if CONTACTS else 'None. Add an entry to CONTACTS dictionary!'}")
+    print(f"Current Contacts: {', '.join(CONTACTS.keys()) if CONTACTS else 'None. Use contact.py to add contacts!'}")
     
     while True:
         try:
