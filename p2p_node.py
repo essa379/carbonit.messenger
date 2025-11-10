@@ -42,8 +42,12 @@ MY_ONION_ADDRESS = ""
 CONTACTS = {}
 
 #contacts
+
 def load_contacts():
-    """Loads contacts from the contact.txt file into a dictionary."""
+    """
+    Loads contacts from contact.txt.
+    New Format: { '1': {'name': 'Edwin', 'onion': '...'}, ... }
+    """
     contacts = {}
     if not os.path.exists(CONTACT_FILE):
         return contacts  # Return empty dict if file doesn't exist
@@ -52,14 +56,17 @@ def load_contacts():
         with open(CONTACT_FILE, 'r') as f:
             for line in f:
                 line = line.strip()
-                if line and '=' in line:
-                    # Split only on the first '='
-                    name, onion = line.split('=', 1)
-                    contacts[name.strip()] = onion.strip()
+                if not line:
+                    continue
+                try:
+                    # New format: number=name=onion
+                    number, name, onion = line.split('=', 2)
+                    contacts[number.strip()] = {'name': name.strip(), 'onion': onion.strip()}
+                except ValueError:
+                    print(f"[WARNING] Skipping malformed line: {line}")
     except Exception as e:
         print(f"[ERROR] Could not read {CONTACT_FILE}: {e}")
     return contacts
-
 # --- 1. The Listener (Receiving Thread) ---
 def listener_thread():
     """Listens for incoming connections from other .onion addresses."""
@@ -110,11 +117,10 @@ def send_message(target_onion, message):
 
 # --- 3. Main Chat Loop ---
 def main_chat_loop():
-    global MY_ONION_ADDRESS, CONTACTS # <-- Add CONTACTS here
+    global MY_ONION_ADDRESS, CONTACTS # Make sure CONTACTS is global
     
     # Read our own .onion address from the file
     try:
-        # Use 'with open' to automatically handle closing the file
         with open(ONION_ADDRESS_FILE, 'r') as f:
             MY_ONION_ADDRESS = f.read().strip()
             print(f"\n[*] Your P2P Node ID (Share this!): {MY_ONION_ADDRESS}")
@@ -123,14 +129,21 @@ def main_chat_loop():
         return
         
     # --- Load external contacts ---
-    CONTACTS = load_contacts() # <-- Add this line
+    CONTACTS = load_contacts() 
 
-    print("\n--- P2P Anonymous Messenger Node Initialized ---")
-    print(f"Current Contacts: {', '.join(CONTACTS.keys()) if CONTACTS else 'None. Use contact.py to add contacts!'}")
+    print("\n--- P2P CarbonIt Messenger Node Initialized ---")
+    
+    # --- New: List contacts by number ---
+    print("--- Your Contacts ---")
+    if not CONTACTS:
+        print("None. Use 'python contact.py add' to add contacts.")
+    else:
+        for number, details in CONTACTS.items():
+            print(f"  [{number}] {details['name']}")
     
     while True:
         try:
-            user_input = input(f"\n(Type 'send <contact> <message>' or 'quit'): ").strip()
+            user_input = input(f"\n(Type 'send <number> <message>' or 'quit'): ").strip()
             
             if user_input.lower() == 'quit':
                 break
@@ -138,24 +151,37 @@ def main_chat_loop():
             if user_input.lower().startswith('send'):
                 parts = user_input.split(maxsplit=2)
                 if len(parts) < 3:
-                    print("Usage: send <contact_name> <message>")
+                    print("Usage: send <contact_number> <message>")
                     continue
                 
-                contact_name = parts[1].lower()
+                contact_number = parts[1]
                 message_content = parts[2]
                 
-                if contact_name not in CONTACTS:
-                    print(f"Unknown contact: {contact_name}.")
+                if contact_number not in CONTACTS:
+                    print(f"Unknown contact ID: {contact_number}. Type 'list' to see contacts.")
                     continue
 
-                target_onion = CONTACTS[contact_name]
+                # Get the contact details from the ID
+                target_details = CONTACTS[contact_number]
+                target_onion = target_details['onion']
+                target_name = target_details['name']
                 
-                full_message = f"From: {MY_ONION_ADDRESS}\nMessage: {message_content}"
+                print(f"[*] Preparing message for [{contact_number}] {target_name}...")
+                
+                full_message = f"From: {MY_ONION_ADDRESS} (Node)\nMessage: {message_content}"
                 send_message(target_onion, full_message)
+            
+            # Optional: Add a 'list' command to re-print contacts
+            elif user_input.lower() == 'list':
+                print("--- Your Contacts ---")
+                if not CONTACTS:
+                    print("None. Use 'python contact.py add' to add contacts.")
+                else:
+                    for number, details in CONTACTS.items():
+                        print(f"  [{number}] {details['name']}")
 
         except KeyboardInterrupt:
             break
-
 # --- Execution ---
 if __name__ == "__main__":
     listener = threading.Thread(target=listener_thread, daemon=True)
