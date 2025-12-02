@@ -1,0 +1,70 @@
+# ================================
+#   CARBONIT ULTRA-FAST TOR MODE
+#  (WARNING: ZERO ANONYMITY MODE - BEST EFFORT)
+# ================================
+
+SocksPort 127.0.0.1:9050
+ControlPort 9051
+
+# Hidden Service Setup
+
+HiddenServiceDir ..\msg\
+
+HiddenServicePort 6543 127.0.0.1:6543
+
+GeoIPFile geoip
+GeoIPv6File geoip6
+
+# --- SPEED OVERRIDES (Logic Conflicts Resolved) ---
+# NOTE: UseEntryGuards MUST be 1 when EntryNodes is set.
+UseEntryGuards 1
+NumEntryGuards 1
+NumDirectoryGuards 1
+
+UseBridges 0
+StrictNodes 1
+
+# Pick only FAST relays (removes anonymity by limiting choices)
+ExitNodes {us},{de},{nl},{fr},{ca}
+EntryNodes {us},{de},{nl},{fr},{ca}
+
+# Disable all padding (reduces overhead)
+ConnectionPadding 0
+ReducedConnectionPadding 1
+
+# Don't rotate circuits (keeps fast circuits active indefinitely)
+NewCircuitPeriod 999999
+MaxCircuitDirtiness 999999
+
+# Avoid slow guards
+AvoidDiskWrites 1
+
+# Remove background load
+DisableNetwork 0
+
+# Fast connection retry (maximum aggression at 3 seconds)
+CircuitBuildTimeout 3
+LearnCircuitBuildTimeout 0
+
+# No directory info slowdown
+FetchDirInfoEarly 1
+FetchDirInfoExtraEarly 1
+
+# No connection limits
+MaxClientCircuitsPending 1024
+
+# Reduce handshake complexity
+ClientOnly 1
+
+# Kill IPv6 (faster on many networks)
+ClientUseIPv6 0
+ClientPreferIPv6ORPort 0
+
+# No circuit padding
+CircuitPadding 0
+
+# Lower handshake load
+ProtocolWarnings 0
+
+# Removed all conflicting/unsupported options:
+# HiddenServiceSingleHopMode, HiddenServiceNonAnonymousMode, CongestionControl, DNSCacheEntries, DNSCacheInterval.
